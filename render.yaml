@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: pigeon-post
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: PORT
+        value: "10000"
+      - key: NODE_ENV
+        value: production
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GEOAPIFY_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PIGEON_MIN_SECONDS
+        value: "45"
+      - key: PIGEON_SECONDS_PER_KM
+        value: "0.45"
+      - key: PIGEON_MAX_SECONDS
+        value: "7200"

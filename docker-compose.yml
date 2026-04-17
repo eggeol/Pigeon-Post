@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pigeon_post
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pigeon_post"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/pigeon_post?schema=public
+      PORT: 10000
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY:-}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me-please-1234567890}
+      PIGEON_MIN_SECONDS: ${PIGEON_MIN_SECONDS:-45}
+      PIGEON_SECONDS_PER_KM: ${PIGEON_SECONDS_PER_KM:-0.45}
+      PIGEON_MAX_SECONDS: ${PIGEON_MAX_SECONDS:-7200}
+    ports:
+      - "3000:10000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
